@@ -1,7 +1,7 @@
 ---
 description: Code refactoring agent that improves readability and maintainability
 mode: all
-model: "github-copilot/claude-sonnet-4.5"
+model: "github-copilot/claude-sonnet-4.6"
 tools:
   read: true
   write: true

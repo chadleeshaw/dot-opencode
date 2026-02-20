@@ -1,7 +1,7 @@
 ---
 description: Bug detection agent that identifies logic errors and potential issues
 mode: all
-model: "github-copilot/claude-sonnet-4.5"
+model: "github-copilot/claude-sonnet-4.6"
 tools:
   read: true
   write: false
