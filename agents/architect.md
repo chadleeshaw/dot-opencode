@@ -1,7 +1,7 @@
 ---
 description: Architecture agent that analyzes and improves workflows, processes, and system design
-mode: all
-model: "github-copilot/claude-sonnet-4.6"
+mode: subagent
+model: "github-copilot/claude-opus-4.6"
 tools:
   read: true
   write: true

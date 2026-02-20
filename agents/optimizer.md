@@ -1,7 +1,7 @@
 ---
 description: Analyze runtime performance and identify bottlenecks and hotspots
-mode: all
-model: "github-copilot/claude-sonnet-4.6"
+mode: subagent
+model: "github-copilot/claude-opus-4.6"
 tools:
   read: true
   write: false

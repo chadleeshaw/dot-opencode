@@ -1,6 +1,6 @@
 ---
 description: Audit existing tests for coverage gaps and quality issues
-mode: all
+mode: subagent
 model: "github-copilot/claude-sonnet-4.6"
 tools:
   read: true

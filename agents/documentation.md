@@ -1,7 +1,7 @@
 ---
 description: Documentation agent that writes clear, concise README and docs/ files
-mode: all
-model: "github-copilot/claude-sonnet-4.6"
+mode: subagent
+model: "github-copilot/claude-haiku-4.5"
 tools:
   read: true
   write: true

@@ -1,6 +1,6 @@
 ---
 description: Code review focused on readability and security issues
-mode: all
+mode: subagent
 model: "github-copilot/claude-sonnet-4.6"
 tools:
   read: true
