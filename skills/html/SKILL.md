@@ -430,6 +430,23 @@ Write semantic, accessible, performant HTML for modern web applications.
 </table>
 ```
 
+## Icons
+
+Use inline SVG for all icons and visual symbols. Do not use emoji as icons or UI elements.
+
+```html
+<!-- Good - SVG icon with accessible label -->
+<button type="button" aria-label="Close">
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2"/>
+  </svg>
+</button>
+
+<!-- Bad - emoji as icon -->
+<button type="button">✕</button>
+<button type="button">🔍 Search</button>
+```
+
 ## What to Avoid
 
 - Divs for everything (use semantic elements)
@@ -441,6 +458,7 @@ Write semantic, accessible, performant HTML for modern web applications.
 - Tables for layout
 - Missing lang attribute
 - Non-keyboard-accessible interactive elements
+- Emoji as icons or UI elements (use SVG)
 
 ## Communication Style
 

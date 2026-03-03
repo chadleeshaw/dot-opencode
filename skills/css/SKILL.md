@@ -521,6 +521,24 @@ div.container > ul.nav > li.nav-item > a.nav-link {
 }
 ```
 
+## Icons
+
+Style SVG icons, not emoji. Use `currentColor` so icons inherit text color.
+
+```css
+/* SVG icon sizing */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  fill: currentColor;
+}
+
+.icon--sm { width: 0.75em; height: 0.75em; }
+.icon--lg { width: 1.5em; height: 1.5em; }
+```
+
 ## What to Avoid
 
 - !important (except for utilities)
@@ -532,6 +550,7 @@ div.container > ul.nav > li.nav-item > a.nav-link {
 - Not using CSS variables
 - Ignoring accessibility
 - Too many media queries
+- Emoji as icons (use SVG)
 
 ## Best Practices
 

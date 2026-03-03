@@ -433,6 +433,26 @@ describe('calculateTotal', () => {
 });
 ```
 
+## Icons
+
+When rendering icons dynamically, use SVG — not emoji characters or Unicode symbols.
+
+```javascript
+// Good - SVG icon
+function createIcon(path, label) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.innerHTML = path;
+  return svg;
+}
+
+// Bad - emoji as icon
+button.textContent = '🔍 Search';
+button.innerHTML = '✕';
+```
+
 ## What to Avoid
 
 - var keyword
@@ -443,6 +463,7 @@ describe('calculateTotal', () => {
 - Unnecessary comments
 - Generic names
 - console.log in production
+- Emoji as icons or UI elements (use SVG)
 
 ## TypeScript Note
 
