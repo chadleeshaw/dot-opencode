@@ -139,6 +139,12 @@ if [[ $EXIT_CODE -eq 0 ]]; then
   echo ""
   echo "oc-worker: $WORKER_NAME — done"
   notify "Task complete"
+
+  # Close this workspace after a brief pause so the result is visible
+  sleep 5
+  if command -v cmux &>/dev/null && [ -n "${CMUX_WORKSPACE_ID:-}" ]; then
+    cmux close-workspace --workspace "$CMUX_WORKSPACE_ID" 2>/dev/null || true
+  fi
 else
   write_status "error"
   sidebar_status "error"
@@ -161,5 +167,11 @@ else
   echo ""
   echo "oc-worker: $WORKER_NAME — error (exit $EXIT_CODE)"
   notify "Task failed (exit $EXIT_CODE)"
+
+  # Close workspace after a longer pause on error so user can see the failure
+  sleep 10
+  if command -v cmux &>/dev/null && [ -n "${CMUX_WORKSPACE_ID:-}" ]; then
+    cmux close-workspace --workspace "$CMUX_WORKSPACE_ID" 2>/dev/null || true
+  fi
   exit $EXIT_CODE
 fi
