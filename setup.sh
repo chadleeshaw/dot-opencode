@@ -23,7 +23,7 @@ info "Setting up dot-opencode from $AGENTS_DIR"
 if [ ! -d "$AGENTS_DIR/.git" ]; then
   echo "dot-opencode: error: $AGENTS_DIR is not a git repo" >&2
   echo "  Clone it first:" >&2
-  echo "    git clone git@gitlab.com:vivint/horizontals/platform-ops/ai/dot-opencode.git ~/.agents" >&2
+  echo "    git clone git@github.com:chadleeshaw/dot-opencode.git ~/.agents" >&2
   exit 1
 fi
 
