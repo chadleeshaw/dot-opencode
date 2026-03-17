@@ -1,0 +1,269 @@
+#!/usr/bin/env bash
+# oc-swarm — orchestrate parallel OpenCode sessions in cmux
+#
+# Usage:
+#   oc-swarm --task "fix auth" --task "refactor ui"
+#   oc-swarm --dir ~/myapp --name auth --task "audit auth" --name ui --task "clean ui"
+#   oc-swarm --watch          # monitor a running swarm
+#   oc-swarm --results        # print results of the last swarm
+
+set -euo pipefail
+
+SWARM_BASE="/tmp/oc-swarm"
+WORKER_BIN="$(dirname "$(realpath "$0")")/oc-worker"
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+usage() {
+  cat >&2 <<'EOF'
+Usage:
+  oc-swarm [--dir <path>] [--name <n>] --task <prompt> [--task <prompt> ...]
+  oc-swarm --watch   [--id <session-id>]
+  oc-swarm --results [--id <session-id>]
+
+Options:
+  --dir <path>      Working directory for all workers (default: cwd)
+  --task <prompt>   Task prompt for a worker (repeat for multiple workers)
+  --name <name>     Name the next --task (default: agent-N)
+  --model <model>   Model passed to opencode (e.g. anthropic/claude-sonnet-4-5)
+  --watch           Live-monitor a running swarm
+  --results         Print collected results from the last swarm
+  --id <id>         Target a specific swarm session ID (default: latest)
+  --help            Show this help
+
+Examples:
+  oc-swarm --task "fix the auth bug" --task "refactor UI components"
+  oc-swarm --dir ~/myapp --name auth --task "audit auth flow" --name ui --task "clean components"
+  oc-swarm --watch
+  oc-swarm --results
+EOF
+  exit 1
+}
+
+die()  { echo "oc-swarm: error: $*" >&2; exit 1; }
+info() { echo "oc-swarm: $*"; }
+ts()   { date +"%Y-%m-%dT%H:%M:%S"; }
+
+require_cmux() {
+  command -v cmux &>/dev/null || die "cmux not found on PATH"
+  local sock="${CMUX_SOCKET_PATH:-/tmp/cmux.sock}"
+  [ -S "$sock" ] || die "cmux socket not found — is cmux running?"
+}
+
+latest_swarm_id() {
+  local latest
+  latest=$(ls -t "$SWARM_BASE" 2>/dev/null | head -1)
+  [[ -n "$latest" ]] || die "no swarm sessions found in $SWARM_BASE"
+  echo "$latest"
+}
+
+write_json() {
+  # write_json <file> <python-dict-expression>
+  python3 -c "import json; json.dump($2, open('$1','w'), indent=2)"
+}
+
+read_json_field() {
+  # read_json_field <file> <field>
+  python3 -c "import json; d=json.load(open('$1')); print(d.get('$2',''))" 2>/dev/null || echo ""
+}
+
+# ── watch mode ────────────────────────────────────────────────────────────────
+
+cmd_watch() {
+  local id="${SWARM_ID:-$(latest_swarm_id)}"
+  local swarm_dir="$SWARM_BASE/$id"
+  [[ -d "$swarm_dir" ]] || die "swarm session not found: $id"
+
+  echo "Watching swarm: $id  (Ctrl-C to stop)"
+  echo ""
+
+  while true; do
+    local all_done=true
+    local lines=()
+
+    for worker_dir in "$swarm_dir/workers"/*/; do
+      [[ -d "$worker_dir" ]] || continue
+      local name status icon updated
+      name=$(basename "$worker_dir")
+      status=$(read_json_field "$worker_dir/status.json" status 2>/dev/null || echo "pending")
+      updated=$(read_json_field "$worker_dir/status.json" updated_at 2>/dev/null || echo "")
+
+      case "$status" in
+        pending) icon="○"; all_done=false ;;
+        running) icon="◌"; all_done=false ;;
+        done)    icon="●" ;;
+        error)   icon="✗" ;;
+        *)       icon="?"; all_done=false ;;
+      esac
+
+      lines+=("  $icon  $(printf '%-20s' "$name")  $status  $updated")
+    done
+
+    clear
+    echo "Swarm: $id"
+    echo "As of: $(ts)"
+    echo ""
+    for l in "${lines[@]}"; do echo "$l"; done
+    echo ""
+
+    if $all_done; then
+      echo "All workers complete."
+      echo "Run 'oc-swarm --results' to view output."
+      break
+    fi
+
+    sleep 2
+  done
+}
+
+# ── results mode ──────────────────────────────────────────────────────────────
+
+cmd_results() {
+  local id="${SWARM_ID:-$(latest_swarm_id)}"
+  local swarm_dir="$SWARM_BASE/$id"
+  [[ -d "$swarm_dir" ]] || die "swarm session not found: $id"
+
+  echo "# Swarm results: $id"
+  echo ""
+
+  for worker_dir in "$swarm_dir/workers"/*/; do
+    [[ -d "$worker_dir" ]] || continue
+    local name prompt
+    name=$(basename "$worker_dir")
+    prompt=$(read_json_field "$worker_dir/task.json" prompt)
+
+    echo "## $name"
+    [[ -n "$prompt" ]] && echo "> $prompt"
+    echo ""
+
+    if [[ -f "$worker_dir/result.md" ]]; then
+      cat "$worker_dir/result.md"
+    else
+      echo "_No result yet._"
+    fi
+    echo ""
+    echo "---"
+    echo ""
+  done
+}
+
+# ── argument parsing ──────────────────────────────────────────────────────────
+
+MODE="launch"
+DIR=""
+SWARM_ID=""
+MODEL=""
+TASK_NAMES=()
+TASK_PROMPTS=()
+PENDING_NAME=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dir|-d)
+      [[ $# -ge 2 ]] || die "--dir needs a value"
+      DIR="$2"; shift 2 ;;
+    --task|-t)
+      [[ $# -ge 2 ]] || die "--task needs a value"
+      TASK_PROMPTS+=("$2")
+      if [[ -n "$PENDING_NAME" ]]; then
+        TASK_NAMES+=("$PENDING_NAME"); PENDING_NAME=""
+      else
+        TASK_NAMES+=("agent-${#TASK_PROMPTS[@]}")
+      fi
+      shift 2 ;;
+    --name|-n)
+      [[ $# -ge 2 ]] || die "--name needs a value"
+      PENDING_NAME="$2"; shift 2 ;;
+    --model|-m)
+      [[ $# -ge 2 ]] || die "--model needs a value"
+      MODEL="$2"; shift 2 ;;
+    --watch)   MODE="watch";   shift ;;
+    --results) MODE="results"; shift ;;
+    --id)
+      [[ $# -ge 2 ]] || die "--id needs a value"
+      SWARM_ID="$2"; shift 2 ;;
+    --help|-h) usage ;;
+    *) die "unknown option: $1" ;;
+  esac
+done
+
+# ── dispatch ──────────────────────────────────────────────────────────────────
+
+case "$MODE" in
+  watch)   cmd_watch;   exit 0 ;;
+  results) cmd_results; exit 0 ;;
+esac
+
+# ── launch ────────────────────────────────────────────────────────────────────
+
+[[ ${#TASK_PROMPTS[@]} -eq 0 ]] && usage
+
+require_cmux
+command -v opencode &>/dev/null  || die "opencode not found on PATH"
+command -v python3  &>/dev/null  || die "python3 not found on PATH"
+[[ -f "$WORKER_BIN" && -x "$WORKER_BIN" ]] || die "oc-worker not found or not executable at $WORKER_BIN"
+
+WORKDIR="${DIR:-$(pwd)}"
+WORKDIR="$(cd "$WORKDIR" 2>/dev/null && pwd)" || die "directory not found: $WORKDIR"
+
+SWARM_ID="$(date +%Y%m%d-%H%M%S)"
+SWARM_DIR="$SWARM_BASE/$SWARM_ID"
+mkdir -p "$SWARM_DIR/workers"
+
+info "session $SWARM_ID — launching ${#TASK_PROMPTS[@]} worker(s) in $WORKDIR"
+echo ""
+
+for i in "${!TASK_PROMPTS[@]}"; do
+  name="${TASK_NAMES[$i]}"
+  prompt="${TASK_PROMPTS[$i]}"
+  worker_dir="$SWARM_DIR/workers/$name"
+  mkdir -p "$worker_dir"
+
+  # Write task.json
+  python3 - "$worker_dir/task.json" "$name" "$prompt" "$WORKDIR" "$SWARM_ID" "$MODEL" <<'PYEOF'
+import json, sys
+path, name, prompt, workdir, swarm_id, model = sys.argv[1:]
+json.dump({
+  "name": name,
+  "prompt": prompt,
+  "dir": workdir,
+  "swarm_id": swarm_id,
+  "model": model or None,
+}, open(path, "w"), indent=2)
+PYEOF
+
+  # Write initial status.json
+  python3 - "$worker_dir/status.json" <<'PYEOF'
+import json, sys, datetime
+json.dump({
+  "status": "pending",
+  "started_at": None,
+  "updated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+}, open(sys.argv[1], "w"), indent=2)
+PYEOF
+
+  # Launch cmux workspace
+  ws_ref=$(cmux new-workspace \
+    --cwd "$WORKDIR" \
+    --command "oc-worker $worker_dir" \
+    2>&1) || die "failed to create workspace for '$name'"
+
+  ws_id=$(echo "$ws_ref" | awk '{print $NF}')
+  if [[ "$ws_id" == workspace:* ]]; then
+    cmux rename-workspace --workspace "$ws_id" "$name" 2>/dev/null || true
+    cmux set-status --workspace "$ws_id" swarm "pending" 2>/dev/null || true
+  fi
+
+  # Truncate long prompts in display
+  display_prompt="${prompt:0:60}$([ ${#prompt} -gt 60 ] && echo '...' || true)"
+  echo "  [✓] $(printf '%-20s' "$name")  $display_prompt"
+  sleep 0.3
+done
+
+echo ""
+info "all workers launched"
+echo ""
+echo "  Monitor:  oc-swarm --watch"
+echo "  Results:  oc-swarm --results"
+echo "  ID:       $SWARM_ID"
+echo "  State:    $SWARM_DIR"

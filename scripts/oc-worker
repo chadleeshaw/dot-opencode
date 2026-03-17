@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# oc-worker — run inside a cmux workspace as a swarm worker
+#
+# Called by oc-swarm as:
+#   oc-worker /tmp/oc-swarm/<id>/workers/<name>
+#
+# It:
+#   1. Reads task.json from the worker directory
+#   2. Updates status.json → running
+#   3. Updates cmux sidebar (status pill + progress bar)
+#   4. Runs: opencode run "<prompt>" --dir <workdir>
+#   5. Captures stdout/stderr to output.log
+#   6. Extracts a result summary into result.md
+#   7. Updates status.json → done | error
+#   8. Fires a cmux notification ring
+
+set -euo pipefail
+
+# ── args ──────────────────────────────────────────────────────────────────────
+
+WORKER_DIR="${1:-}"
+[[ -n "$WORKER_DIR" && -d "$WORKER_DIR" ]] || {
+  echo "oc-worker: error: worker directory not found: '$WORKER_DIR'" >&2
+  exit 1
+}
+
+TASK_FILE="$WORKER_DIR/task.json"
+STATUS_FILE="$WORKER_DIR/status.json"
+RESULT_FILE="$WORKER_DIR/result.md"
+LOG_FILE="$WORKER_DIR/output.log"
+
+[[ -f "$TASK_FILE" ]] || { echo "oc-worker: error: task.json not found in $WORKER_DIR" >&2; exit 1; }
+
+# ── read task ─────────────────────────────────────────────────────────────────
+
+read_field() {
+  python3 -c "import json,sys; d=json.load(open('$TASK_FILE')); print(d.get('$1') or '')" 2>/dev/null || echo ""
+}
+
+WORKER_NAME=$(read_field name)
+PROMPT=$(read_field prompt)
+WORKDIR=$(read_field dir)
+MODEL=$(read_field model)
+
+[[ -n "$PROMPT" ]]  || { echo "oc-worker: error: task.json missing 'prompt'" >&2; exit 1; }
+[[ -n "$WORKDIR" ]] || WORKDIR="$(pwd)"
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+ts() { date +"%Y-%m-%dT%H:%M:%S"; }
+
+write_status() {
+  local status="$1"
+  python3 - "$STATUS_FILE" "$status" <<'PYEOF'
+import json, sys, datetime
+path, status = sys.argv[1], sys.argv[2]
+existing = {}
+try:
+    existing = json.load(open(path))
+except Exception:
+    pass
+existing.update({
+    "status": status,
+    "updated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+})
+if status == "running" and not existing.get("started_at"):
+    existing["started_at"] = existing["updated_at"]
+json.dump(existing, open(path, "w"), indent=2)
+PYEOF
+}
+
+sidebar_status() {
+  # Update the cmux sidebar pill for this workspace (best-effort)
+  command -v cmux &>/dev/null || return 0
+  [ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || return 0
+  cmux set-status swarm "$1" 2>/dev/null || true
+}
+
+sidebar_progress() {
+  command -v cmux &>/dev/null || return 0
+  [ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || return 0
+  cmux set-progress "$1" --label "$2" 2>/dev/null || true
+}
+
+notify() {
+  command -v cmux &>/dev/null || return 0
+  [ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || return 0
+  cmux notify --title "oc-swarm: $WORKER_NAME" --body "$1" 2>/dev/null || true
+}
+
+# ── run ───────────────────────────────────────────────────────────────────────
+
+echo ""
+echo "┌─ oc-worker: $WORKER_NAME"
+echo "│  dir:    $WORKDIR"
+echo "│  prompt: $PROMPT"
+[[ -n "$MODEL" ]] && echo "│  model:  $MODEL"
+echo "└─ starting..."
+echo ""
+
+write_status "running"
+sidebar_status "running"
+sidebar_progress "0.1" "starting"
+
+# Build opencode command
+OC_ARGS=(opencode run "$PROMPT" --dir "$WORKDIR")
+[[ -n "$MODEL" ]] && OC_ARGS+=(--model "$MODEL")
+
+# Run opencode, tee output to log and terminal
+sidebar_progress "0.3" "running"
+
+EXIT_CODE=0
+"${OC_ARGS[@]}" 2>&1 | tee "$LOG_FILE" || EXIT_CODE=$?
+
+sidebar_progress "0.9" "finishing"
+
+# ── write result ──────────────────────────────────────────────────────────────
+
+if [[ $EXIT_CODE -eq 0 ]]; then
+  write_status "done"
+  sidebar_status "done"
+  sidebar_progress "1.0" "done"
+
+  # Build result.md from the log — grab last ~100 lines as the summary
+  {
+    echo "# Result: $WORKER_NAME"
+    echo ""
+    echo "**Task:** $PROMPT"
+    echo ""
+    echo "**Completed:** $(ts)"
+    echo ""
+    echo "## Output"
+    echo ""
+    echo '```'
+    tail -100 "$LOG_FILE"
+    echo '```'
+  } > "$RESULT_FILE"
+
+  echo ""
+  echo "oc-worker: $WORKER_NAME — done"
+  notify "Task complete"
+else
+  write_status "error"
+  sidebar_status "error"
+  cmux clear-progress 2>/dev/null || true
+
+  {
+    echo "# Error: $WORKER_NAME"
+    echo ""
+    echo "**Task:** $PROMPT"
+    echo ""
+    echo "**Failed at:** $(ts)  (exit code: $EXIT_CODE)"
+    echo ""
+    echo "## Output"
+    echo ""
+    echo '```'
+    tail -50 "$LOG_FILE"
+    echo '```'
+  } > "$RESULT_FILE"
+
+  echo ""
+  echo "oc-worker: $WORKER_NAME — error (exit $EXIT_CODE)"
+  notify "Task failed (exit $EXIT_CODE)"
+  exit $EXIT_CODE
+fi
