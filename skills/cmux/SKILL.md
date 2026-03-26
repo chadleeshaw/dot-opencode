@@ -23,7 +23,7 @@ cmux auto-sets `CMUX_WORKSPACE_ID` and `CMUX_SURFACE_ID` in every terminal it sp
 
 1. **Orient first** — run `cmux tree --all` to understand the current workspace/pane/surface layout before acting
 2. **Surface refs** — browser commands require `--surface <ref>` (e.g. `surface:6`); always confirm the surface exists in the tree
-3. **Browser flag order** — the `--surface` flag must come *before* the subcommand: `cmux browser --surface surface:6 goto https://...`
+3. **Browser flag order** — the `--surface` flag must come _before_ the subcommand: `cmux browser --surface surface:6 goto https://...`
 4. **Graceful fallback** — many commands silently no-op if cmux isn't running; always check `test -S /tmp/cmux.sock` before scripting
 5. **Never touch production remotes** — when used in the `tools/incus` repo, only use the `local` Incus remote
 
@@ -209,6 +209,24 @@ cmux browser --surface surface:6 find placeholder "Search..."
 
 > **WKWebView limitations:** `network.requests`, `trace`, and `screencast` are not supported on macOS (WKWebView). These work on Linux with a Chromium-based engine.
 
+> **React controlled inputs:** `fill` and `type` set the DOM value directly, which React ignores because it tracks state in its fiber, not the DOM. For React apps (and other frameworks with controlled inputs like Vue, Angular), use `eval` with the native property setter to force React to pick up the change:
+>
+> ```bash
+> cmux browser --surface $SURF eval "
+>   function setReactValue(sel, val) {
+>     var el = document.querySelector(sel);
+>     Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')
+>       .set.call(el, val);
+>     el.dispatchEvent(new Event('input', { bubbles: true }));
+>     el.dispatchEvent(new Event('change', { bubbles: true }));
+>   }
+>   setReactValue('#email', 'user@example.com');
+>   setReactValue('#password', 'secret');
+> "
+> ```
+>
+> Then click the submit button normally. This is a framework limitation, not a cmux bug.
+
 ---
 
 ## Terminal Interaction
@@ -256,21 +274,28 @@ Use the OpenCode plugin API to fire notifications on session events:
 
 ```js
 export const CmuxNotifyPlugin = async ({ $ }) => {
-  const inCmux = await $`test -S /tmp/cmux.sock`.quiet().then(() => true).catch(() => false)
-  if (!inCmux) return {}
+  const inCmux = await $`test -S /tmp/cmux.sock`
+    .quiet()
+    .then(() => true)
+    .catch(() => false);
+  if (!inCmux) return {};
 
   return {
     event: async ({ event }) => {
       if (event.type === "session.idle") {
-        await $`cmux notify --title "OpenCode" --body "Waiting for your input"`.quiet().catch(() => {})
+        await $`cmux notify --title "OpenCode" --body "Waiting for your input"`
+          .quiet()
+          .catch(() => {});
       }
       if (event.type === "session.error") {
-        const msg = event.properties?.message ?? "An error occurred"
-        await $`cmux notify --title "OpenCode Error" --body ${msg}`.quiet().catch(() => {})
+        const msg = event.properties?.message ?? "An error occurred";
+        await $`cmux notify --title "OpenCode Error" --body ${msg}`
+          .quiet()
+          .catch(() => {});
       }
     },
-  }
-}
+  };
+};
 ```
 
 ---
@@ -350,6 +375,7 @@ oc-swarm --results --id 20260325-143000
 ```
 
 Each `oc-worker` process:
+
 - Updates `status.json` → `running` / `done` / `error`
 - Sets sidebar progress bar and status pill via `cmux set-progress` / `cmux set-status`
 - Sends a `cmux notify` on completion or failure
@@ -396,11 +422,13 @@ cmux last-pane
 ## Common Workflows
 
 ### Open a URL alongside current terminal
+
 ```bash
 cmux browser open https://docs.example.com
 ```
 
 ### Automate a web form
+
 ```bash
 # 1. Open browser and navigate
 cmux browser open-split https://app.example.com/login
@@ -409,19 +437,49 @@ SURF=surface:X  # use ref from output
 # 2. Snapshot to find element refs
 cmux browser --surface $SURF snapshot --compact
 
-# 3. Fill and submit
+# 3. Fill and submit (plain HTML forms)
 cmux browser --surface $SURF fill "#email" "user@example.com"
 cmux browser --surface $SURF fill "#password" "secret"
 cmux browser --surface $SURF click "#submit"
 cmux browser --surface $SURF wait --url-contains "/dashboard"
 ```
 
+### Automate a React (or Vue/Angular) form
+
+`fill` and `type` won't work on framework-controlled inputs — they set the DOM value but never fire the synthetic events the framework listens to. Use `eval` with the native property setter instead:
+
+```bash
+SURF=surface:X
+
+# Set values into React controlled inputs
+cmux browser --surface $SURF eval "
+  function setReactValue(sel, val) {
+    var el = document.querySelector(sel);
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')
+      .set.call(el, val);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  setReactValue('#email', 'user@example.com');
+  setReactValue('#password', 'secret');
+"
+
+# Verify the framework picked up the values
+cmux browser --surface $SURF eval "document.querySelector('#email').value"
+
+# Submit normally
+cmux browser --surface $SURF click "#submit"
+cmux browser --surface $SURF wait --url-contains "/dashboard"
+```
+
 ### Read terminal output from another pane
+
 ```bash
 cmux read-screen --surface surface:2 --lines 50
 ```
 
 ### Track task progress in the sidebar
+
 ```bash
 cmux set-status task "running" --color "#f59e0b"
 cmux set-progress 0.0 --label "starting"
@@ -435,11 +493,13 @@ cmux log "Task complete" --level success
 ```
 
 ### Open a plan doc in a viewer split
+
 ```bash
 cmux markdown open .planning/PLAN.md
 ```
 
 ### Check if running inside cmux
+
 ```bash
 test -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" && echo "in cmux" || echo "not in cmux"
 ```
@@ -448,10 +508,10 @@ test -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" && echo "in cmux" || echo "not in 
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `CMUX_WORKSPACE_ID` | Auto-set in cmux terminals; default `--workspace` for all commands |
-| `CMUX_SURFACE_ID` | Auto-set in cmux terminals; default `--surface` for all commands |
-| `CMUX_TAB_ID` | Auto-set; used as default `--tab` for tab-action/rename-tab |
-| `CMUX_SOCKET_PATH` | Override socket path (default: `~/Library/Application Support/cmux/cmux.sock`) |
-| `CMUX_SOCKET_PASSWORD` | Auth password for the socket |
+| Variable               | Description                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `CMUX_WORKSPACE_ID`    | Auto-set in cmux terminals; default `--workspace` for all commands             |
+| `CMUX_SURFACE_ID`      | Auto-set in cmux terminals; default `--surface` for all commands               |
+| `CMUX_TAB_ID`          | Auto-set; used as default `--tab` for tab-action/rename-tab                    |
+| `CMUX_SOCKET_PATH`     | Override socket path (default: `~/Library/Application Support/cmux/cmux.sock`) |
+| `CMUX_SOCKET_PASSWORD` | Auth password for the socket                                                   |
