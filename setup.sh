@@ -87,6 +87,19 @@ if ! echo "$PATH" | tr ':' '\n' | grep -qx "$LOCAL_BIN"; then
   echo ""
 fi
 
+# ── forge config symlinks ─────────────────────────────────────────────────────
+
+FORGE_CONFIG="$HOME/.forge"
+
+info "Symlinking forge config directories..."
+
+mkdir -p "$FORGE_CONFIG"
+
+symlink "$AGENTS_DIR/agents"   "$FORGE_CONFIG/agents"
+symlink "$AGENTS_DIR/commands" "$FORGE_CONFIG/commands"
+symlink "$AGENTS_DIR/skills"   "$FORGE_CONFIG/skills"
+symlink "$AGENTS_DIR/plugins"  "$FORGE_CONFIG/plugins"
+
 # ── cmux CLI symlink ──────────────────────────────────────────────────────────
 
 CMUX_APP="/Applications/cmux.app/Contents/Resources/bin/cmux"
@@ -107,5 +120,9 @@ echo "  OpenCode agents:   $OPENCODE_CONFIG/agents    -> $AGENTS_DIR/agents"
 echo "  OpenCode commands: $OPENCODE_CONFIG/commands  -> $AGENTS_DIR/commands"
 echo "  OpenCode skills:   $OPENCODE_CONFIG/skills    -> $AGENTS_DIR/skills"
 echo "  OpenCode plugins:  $OPENCODE_CONFIG/plugins   -> $AGENTS_DIR/plugins"
+echo "  Forge agents:      $FORGE_CONFIG/agents       -> $AGENTS_DIR/agents"
+echo "  Forge commands:    $FORGE_CONFIG/commands     -> $AGENTS_DIR/commands"
+echo "  Forge skills:      $FORGE_CONFIG/skills       -> $AGENTS_DIR/skills"
+echo "  Forge plugins:     $FORGE_CONFIG/plugins      -> $AGENTS_DIR/plugins"
 echo "  Scripts:           $LOCAL_BIN/{oc-swarm,oc-worker}"
 echo ""
