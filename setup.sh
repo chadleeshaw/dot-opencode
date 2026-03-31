@@ -89,7 +89,7 @@ fi
 
 # ── forge config symlinks ─────────────────────────────────────────────────────
 
-FORGE_CONFIG="$HOME/.forge"
+FORGE_CONFIG="$HOME/forge"
 
 info "Symlinking forge config directories..."
 
