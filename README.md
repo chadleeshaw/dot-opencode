@@ -39,7 +39,7 @@ Custom agents in `agents/` extend OpenCode's built-in agent types.
 | `refactor` | Improve readability and maintainability |
 | `test-coverage` | Audit tests for coverage gaps and quality issues |
 | `test-writer` | Write readable, maintainable tests for existing code |
-| `gsd-*` | GSD orchestration suite — plan, execute, verify, debug phases |
+| `grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding |
 
 ## Commands
 
@@ -48,6 +48,7 @@ Slash commands in `commands/` are available inside any OpenCode session.
 | Command | Purpose |
 |---|---|
 | `/shipit` | Stage, commit, and push changes with an auto-generated message |
+| `/simplify` | Refactor selected code for clarity and simplicity |
 | `/test` | Run tests and fix failures |
 
 ## Skills
@@ -56,12 +57,15 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 
 | Skill | Loaded for |
 |---|---|
+| `cmux` | cmux terminal multiplexer — workspaces, browser automation, notifications |
 | `golang` | Go best practices |
 | `javascript` | JS/TS best practices |
 | `python` | Python best practices |
 | `css` | CSS best practices |
 | `html` | HTML best practices |
 | `obsidian` | Obsidian notes and knowledge management |
+| `saltstack` | SaltStack states, formulas, pillar, and configuration management |
+| `terraform` | Terraform HCL, modules, and infrastructure as code |
 
 ## Plugins
 
