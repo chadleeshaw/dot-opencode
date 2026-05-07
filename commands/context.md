@@ -1,5 +1,5 @@
 ---
-description: Load AI context notes from Obsidian (_ai/me, environment, workflows, agents, team)
+description: Load AI context notes from Obsidian (_ai/me, environment, infrastructure, workflows, agents, team)
 ---
 
 Read and internalize the following context notes about Chad and his environment:
@@ -10,6 +10,9 @@ Read and internalize the following context notes about Chad and his environment:
 ## environment.md
 !`obsidian read path="_ai/environment.md"`
 
+## infrastructure.md
+!`obsidian read path="_ai/infrastructure.md"`
+
 ## workflows.md
 !`obsidian read path="_ai/workflows.md"`
 
@@ -19,4 +22,4 @@ Read and internalize the following context notes about Chad and his environment:
 ## team.md
 !`obsidian read path="_ai/team.md"`
 
-Use these notes as the source of truth for Chad's background, available tools, workflows, and team for the rest of this session.
+Use these notes as the source of truth for Chad's background, local environment, work infrastructure, workflows, and team for the rest of this session.

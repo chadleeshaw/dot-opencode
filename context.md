@@ -5,6 +5,7 @@ At the start of every session, read the AI context notes from the Obsidian vault
 ```bash
 obsidian read path="_ai/me.md"
 obsidian read path="_ai/environment.md"
+obsidian read path="_ai/infrastructure.md"
 obsidian read path="_ai/workflows.md"
 obsidian read path="_ai/agents.md"
 obsidian read path="_ai/team.md"
@@ -12,7 +13,8 @@ obsidian read path="_ai/team.md"
 
 These notes are the source of truth for:
 - Chad's background, role, and vault structure (`me.md`)
-- Available CLI tools, scripts, skills, and agent infrastructure (`environment.md`)
+- Local machine — CLI tools, GCP auth, OpenCode, skills (`environment.md`)
+- Work infrastructure — datacenters, networking, Kubernetes, Salt, hardware (`infrastructure.md`)
 - Workflows and task patterns (`workflows.md`)
 - How Chad likes to work with OpenCode — preferences, swarm usage, model (`agents.md`)
 - Team members, Jira board, and Confluence docs (`team.md`)
