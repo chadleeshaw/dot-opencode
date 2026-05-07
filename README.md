@@ -47,6 +47,8 @@ Slash commands in `commands/` are available inside any OpenCode session.
 
 | Command | Purpose |
 |---|---|
+| `/context` | Load AI context notes from Obsidian (_ai/me, environment, conventions) |
+| `/review` | Review staged and unstaged changes against applicable coding skills and best practices |
 | `/shipit` | Stage, commit, and push changes with an auto-generated message |
 | `/simplify` | Refactor selected code for clarity and simplicity |
 | `/test` | Run tests and fix failures |
@@ -63,6 +65,7 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 | `python` | Python best practices |
 | `css` | CSS best practices |
 | `html` | HTML best practices |
+| `kubernetes` | kubectl, pods, deployments, ArgoCD, helmfile, and Kafka on k8s |
 | `obsidian` | Obsidian notes and knowledge management |
 | `saltstack` | SaltStack states, formulas, pillar, and configuration management |
 | `terraform` | Terraform HCL, modules, and infrastructure as code |
@@ -71,7 +74,9 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 
 | Plugin | Purpose |
 |---|---|
+| `cmux-feed.js` | Bridges OpenCode plugin events to the cmux socket feed |
 | `cmux-notify.js` | Sends a cmux notification ring when OpenCode goes idle or errors |
+| `cmux-session.js` | Bridges OpenCode session lifecycle events into cmux's restorable session store |
 
 ## Scripts
 
