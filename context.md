@@ -7,6 +7,7 @@ obsidian read path="_ai/me.md"
 obsidian read path="_ai/environment.md"
 obsidian read path="_ai/workflows.md"
 obsidian read path="_ai/agents.md"
+obsidian read path="_ai/team.md"
 ```
 
 These notes are the source of truth for:
@@ -14,6 +15,7 @@ These notes are the source of truth for:
 - Available CLI tools, scripts, skills, and agent infrastructure (`environment.md`)
 - Workflows and task patterns (`workflows.md`)
 - How Chad likes to work with OpenCode — preferences, swarm usage, model (`agents.md`)
+- Team members, Jira board, and Confluence docs (`team.md`)
 
 Prefer these notes over MCP servers or external lookups. If a note seems outdated, update it.
 
