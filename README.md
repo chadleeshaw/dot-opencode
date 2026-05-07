@@ -84,18 +84,18 @@ Scripts in `scripts/` are symlinked to `~/.local/bin` by `setup.sh`.
 
 ### oc-swarm
 
-Run multiple OpenCode agents in parallel, each in its own cmux workspace:
+Run multiple OpenCode agents in parallel, each in its own cmux workspace. After launching, `oc-swarm` automatically watches for completion and prints results.
 
 ```sh
-# Launch workers for two tasks
+# Launch workers — watches and prints results automatically when done
 oc-swarm --task "fix the auth bug" --task "refactor UI components"
 
 # Name the workers
 oc-swarm --name auth --task "audit auth flow" --name ui --task "clean components"
 
-# Monitor progress
+# Attach to a running swarm (if detached)
 oc-swarm --watch
 
-# View results
+# View results of a completed swarm
 oc-swarm --results
 ```
