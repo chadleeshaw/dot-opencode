@@ -192,33 +192,32 @@ apps:
         namespace: <namespace>
 ```
 
-### Optimus — render manifests
+### Manifest rendering — deploy a new image or chart version
 
-`optimus` is the local CLI for rendering ArgoCD manifests from the deployment repo.
-Always run it from the app directory (the one containing `apps.yaml`).
+Use the local manifest rendering CLI for your deployment repo.
+Always run it from the app directory (the one containing the app manifest/config file).
+See `_ai/tools/` in your Obsidian vault for tool-specific details.
 
 ```bash
-cd ~/src/platform/deployments/<team>/<app-name>
+cd <deployments-repo>/<team>/<app-name>
 
 # Render current manifests (no changes)
-optimus template
+<manifest-cli> template
 
 # Render with a new image tag
-optimus template --set-image <app-name>:<new-tag>
-optimus template -i <app-name>:<new-tag>
+<manifest-cli> template --set-image <app-name>:<new-tag>
 
 # Render with a new chart version
-optimus template --set-chart <app-name>:<new-version>
-optimus template -c <app-name>:<new-version>
+<manifest-cli> template --set-chart <app-name>:<new-version>
 
 # Render with both image tag and chart version updated
-optimus template -i <app-name>:<tag> -c <app-name>:<version>
+<manifest-cli> template --set-image <app>:<tag> --set-chart <app>:<version>
 ```
 
 ### Workflow: deploy a new image or chart version
 
-1. `cd` into the app directory (contains `apps.yaml`)
-2. Run `optimus template -i <app>:<tag>` or `-c <app>:<version>`
+1. `cd` into the app directory
+2. Run the manifest CLI with `--set-image` or `--set-chart` flags
 3. Review with `git diff`
 4. Commit and push — ArgoCD picks up the change via GitOps sync
 
