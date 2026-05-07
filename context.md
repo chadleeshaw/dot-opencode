@@ -6,14 +6,14 @@ At the start of every session, read the AI context notes from the Obsidian vault
 obsidian read path="_ai/me.md"
 obsidian read path="_ai/environment.md"
 obsidian read path="_ai/workflows.md"
-obsidian read path="_ai/agent-workflow.md"
+obsidian read path="_ai/agents.md"
 ```
 
 These notes are the source of truth for:
 - Chad's background, role, and vault structure (`me.md`)
 - Available CLI tools, scripts, skills, and agent infrastructure (`environment.md`)
 - Workflows and task patterns (`workflows.md`)
-- How Chad likes to work with OpenCode — preferences, swarm usage, model (`agent-workflow.md`)
+- How Chad likes to work with OpenCode — preferences, swarm usage, model (`agents.md`)
 
 Prefer these notes over MCP servers or external lookups. If a note seems outdated, update it.
 
