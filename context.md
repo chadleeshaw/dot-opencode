@@ -5,13 +5,13 @@ At the start of every session, read the AI context notes from the Obsidian vault
 ```bash
 obsidian read path="_ai/me.md"
 obsidian read path="_ai/environment.md"
-obsidian read path="_ai/conventions.md"
+obsidian read path="_ai/workflows.md"
 ```
 
 These notes are the source of truth for:
 - Chad's background, role, and vault structure (`me.md`)
 - Available CLI tools, scripts, skills, and agent infrastructure (`environment.md`)
-- Coding conventions and workflows by language/tool (`conventions.md`)
+- Workflows and task patterns (`workflows.md`)
 
 Prefer these notes over MCP servers or external lookups. If a note seems outdated, update it.
 
@@ -23,8 +23,8 @@ When you discover something new about Chad's environment during a session — a 
 # Add to environment.md when a new tool or script is discovered
 obsidian append path="_ai/environment.md" content="\n## New Section or entry"
 
-# Add to conventions.md when a new pattern or workflow is established
-obsidian append path="_ai/conventions.md" content="\n## New convention"
+# Add to workflows.md when a new workflow or task pattern is established
+obsidian append path="_ai/workflows.md" content="\n## New convention"
 
 # Update the frontmatter date after any edit
 obsidian property:set name="updated" value="<today>" file="environment"
