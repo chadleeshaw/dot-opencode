@@ -263,7 +263,9 @@ done
 echo ""
 info "all workers launched"
 echo ""
-echo "  Monitor:  oc-swarm --watch"
-echo "  Results:  oc-swarm --results"
 echo "  ID:       $SWARM_ID"
 echo "  State:    $SWARM_DIR"
+echo ""
+
+cmd_watch
+cmd_results
