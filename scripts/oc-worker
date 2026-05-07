@@ -88,6 +88,15 @@ notify() {
   cmux notify --title "oc-swarm: $WORKER_NAME" --body "$1" 2>/dev/null || true
 }
 
+sidebar_log() {
+  local level="${1:-info}"
+  local msg="$2"
+  local source="${3:-oc-swarm}"
+  command -v cmux &>/dev/null || return 0
+  [ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || return 0
+  cmux log "$msg" --level "$level" --source "$source" 2>/dev/null || true
+}
+
 # ── run ───────────────────────────────────────────────────────────────────────
 
 echo ""
@@ -101,6 +110,7 @@ echo ""
 write_status "running"
 sidebar_status "running"
 sidebar_progress "0.1" "starting"
+sidebar_log "info" "Started: ${PROMPT:0:80}" "oc-swarm"
 
 # Build opencode command
 OC_ARGS=(opencode run "$PROMPT" --dir "$WORKDIR")
@@ -108,6 +118,7 @@ OC_ARGS=(opencode run "$PROMPT" --dir "$WORKDIR")
 
 # Run opencode, tee output to log and terminal
 sidebar_progress "0.3" "running"
+sidebar_log "info" "Running opencode in $WORKDIR" "oc-swarm"
 
 EXIT_CODE=0
 "${OC_ARGS[@]}" 2>&1 | tee "$LOG_FILE" || EXIT_CODE=$?
@@ -139,6 +150,7 @@ if [[ $EXIT_CODE -eq 0 ]]; then
   echo ""
   echo "oc-worker: $WORKER_NAME — done"
   notify "Task complete"
+  sidebar_log "success" "Done: ${PROMPT:0:80}" "oc-swarm"
 
   # Close this workspace after a brief pause so the result is visible
   sleep 5
@@ -167,6 +179,7 @@ else
   echo ""
   echo "oc-worker: $WORKER_NAME — error (exit $EXIT_CODE)"
   notify "Task failed (exit $EXIT_CODE)"
+  sidebar_log "error" "Failed (exit $EXIT_CODE): ${PROMPT:0:80}" "oc-swarm"
 
   # Close workspace after a longer pause on error so user can see the failure
   sleep 10
