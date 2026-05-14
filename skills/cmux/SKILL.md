@@ -401,30 +401,12 @@ cmux set-hook --unset session-start
 
 ## SSH Sessions
 
-**Never use `cmux ssh` or bare `ssh` in the bash tool.** Always open a right split in the current workspace and send commands via `cmux send` / `cmux read-screen`. This keeps SSH sessions in the same workspace and allows interactive prompts (passwords, passphrases) to be handled by the user.
-
-### Workflow: SSH with interactive prompt
+SSH key passphrase is stored in macOS Keychain — use plain `ssh` directly in the bash tool. No cmux split required for SSH.
 
 ```bash
-# 1. Split the current pane right
-cmux new-split right
-# Note the surface ref from output (e.g. surface:6)
-
-# 2. Initiate SSH in the split
-cmux send --surface surface:X "ssh user@host\n"
-
-# 3. Read screen — wait for password/passphrase prompt
-cmux read-screen --surface surface:X --lines 20
-
-# 4. User types passphrase/password interactively in the split
-
-# 5. Run commands and read output
-cmux send --surface surface:X "uptime\n"
-sleep 1
-cmux read-screen --surface surface:X --lines 20
+# Just use ssh directly
+ssh user@host "uptime"
 ```
-
-> **Note:** Always use `cmux read-screen` after sending a command to verify the prompt returned before sending the next command. Add `sleep` if the remote command takes time.
 
 ---
 

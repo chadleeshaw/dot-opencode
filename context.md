@@ -38,26 +38,11 @@ obsidian property:set name="updated" value="<today>" file="environment"
 
 ## SSH Sessions
 
-**Always use a right split for SSH connections — never bare `ssh` in the bash tool, never `cmux ssh`, never open a new workspace.**
-
-Chad's SSH sessions require interactive password input, which the bash tool cannot handle. Open a split in the current workspace and send commands via `cmux send` / `cmux read-screen`.
+SSH key passphrase is stored in macOS Keychain (`UseKeychain yes` in `~/.ssh/config`). Use plain `ssh` directly in the bash tool — no interactive prompt, no cmux split required.
 
 ```bash
-# 1. Split the current pane right
-cmux new-split right
-# Note the surface ref from output (e.g. surface:6)
-
-# 2. Initiate SSH in the split
-cmux send --surface surface:X "ssh user@host\n"
-
-# 3. Read screen — wait for password prompt
-cmux read-screen --surface surface:X --lines 20
-
-# 4. Chad types password interactively in the split
-
-# 5. Run commands and read output
-cmux send --surface surface:X "uptime\n"
-cmux read-screen --surface surface:X --lines 20
+# Just use ssh directly
+ssh user@host "uptime"
 ```
 
 Examples of things that should trigger an update:
