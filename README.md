@@ -12,7 +12,6 @@ Cloned to `~/.agents` and symlinked into `~/.config/opencode` by `setup.sh`.
 ├── commands/     # Slash commands (/shipit, /test, ...)
 ├── skills/       # Language/domain skills loaded on demand
 ├── plugins/      # OpenCode JS plugins
-├── scripts/      # CLI tools (oc-swarm, oc-worker)
 └── setup.sh      # Idempotent install script
 ```
 
@@ -61,6 +60,7 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 |---|---|
 | `cmux` | cmux terminal multiplexer — workspaces, browser automation, notifications |
 | `golang` | Go best practices |
+| `incus` | Incus container and VM management via CLI |
 | `javascript` | JS/TS best practices |
 | `python` | Python best practices |
 | `css` | CSS best practices |
@@ -77,30 +77,3 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 | `cmux-feed.js` | Bridges OpenCode plugin events to the cmux socket feed |
 | `cmux-notify.js` | Sends a cmux notification ring when OpenCode goes idle or errors |
 | `cmux-session.js` | Bridges OpenCode session lifecycle events into cmux's restorable session store |
-
-## Scripts
-
-Scripts in `scripts/` are symlinked to `~/.local/bin` by `setup.sh`.
-
-| Script | Purpose |
-|---|---|
-| `oc-swarm` | Orchestrate parallel OpenCode sessions in cmux workspaces |
-| `oc-worker` | Worker process spawned by `oc-swarm` inside each workspace |
-
-### oc-swarm
-
-Run multiple OpenCode agents in parallel, each in its own cmux workspace. After launching, `oc-swarm` automatically watches for completion and prints results.
-
-```sh
-# Launch workers — watches and prints results automatically when done
-oc-swarm --task "fix the auth bug" --task "refactor UI components"
-
-# Name the workers
-oc-swarm --name auth --task "audit auth flow" --name ui --task "clean components"
-
-# Attach to a running swarm (if detached)
-oc-swarm --watch
-
-# View results of a completed swarm
-oc-swarm --results
-```

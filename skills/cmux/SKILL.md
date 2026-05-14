@@ -25,7 +25,6 @@ cmux auto-sets `CMUX_WORKSPACE_ID` and `CMUX_SURFACE_ID` in every terminal it sp
 2. **Surface refs** — browser commands require `--surface <ref>` (e.g. `surface:6`); always confirm the surface exists in the tree
 3. **Browser flag order** — the `--surface` flag must come _before_ the subcommand: `cmux browser --surface surface:6 goto https://...`
 4. **Graceful fallback** — many commands silently no-op if cmux isn't running; always check `test -S /tmp/cmux.sock` before scripting
-5. **Never touch production remotes** — when used in the `tools/incus` repo, only use the `local` Incus remote
 
 ---
 
@@ -350,40 +349,6 @@ cmux markdown ~/notes/plan.md   # shorthand
 
 ---
 
-## Multi-Agent Splits (oc-swarm pattern)
-
-Use `oc-swarm` to launch parallel OpenCode agents, each in their own cmux workspace with sidebar status tracking.
-
-```bash
-# Launch two parallel agents
-oc-swarm --task "fix the auth bug" --task "refactor UI components"
-
-# Name agents explicitly
-oc-swarm --name auth --task "audit auth flow" --name ui --task "clean components"
-
-# Target a specific directory
-oc-swarm --dir ~/myapp --task "write tests" --task "update docs"
-
-# Monitor running swarm
-oc-swarm --watch
-
-# View results when complete
-oc-swarm --results
-
-# Target a specific swarm session
-oc-swarm --results --id 20260325-143000
-```
-
-Each `oc-worker` process:
-
-- Updates `status.json` → `running` / `done` / `error`
-- Sets sidebar progress bar and status pill via `cmux set-progress` / `cmux set-status`
-- Sends a `cmux notify` on completion or failure
-- Writes results to `result.md` in `/tmp/oc-swarm/<id>/workers/<name>/`
-- Auto-closes the workspace after completion
-
----
-
 ## Hooks
 
 ```bash
@@ -407,24 +372,6 @@ SSH key passphrase is stored in macOS Keychain — use plain `ssh` directly in t
 # Just use ssh directly
 ssh user@host "uptime"
 ```
-
----
-
-
-
-`cmux claude-teams` is a cmux-managed pass-through to the `claude` CLI (Claude Code). It launches Claude Code within a cmux-aware context, passing any arguments directly to the `claude` binary.
-
-```bash
-# Launch an interactive Claude Code session
-cmux claude-teams
-
-# Pass any claude CLI args through
-cmux claude-teams --model claude-sonnet-4-6
-cmux claude-teams -p "summarize this repo" --dir ~/myapp
-cmux claude-teams --resume
-```
-
-All standard `claude` CLI flags are supported — see `claude --help` for the full list.
 
 ---
 
@@ -542,5 +489,5 @@ test -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" && echo "in cmux" || echo "not in 
 | `CMUX_WORKSPACE_ID`    | Auto-set in cmux terminals; default `--workspace` for all commands             |
 | `CMUX_SURFACE_ID`      | Auto-set in cmux terminals; default `--surface` for all commands               |
 | `CMUX_TAB_ID`          | Auto-set; used as default `--tab` for tab-action/rename-tab                    |
-| `CMUX_SOCKET_PATH`     | Override socket path (default: `~/Library/Application Support/cmux/cmux.sock`) |
+| `CMUX_SOCKET_PATH`     | Override socket path (default: `/tmp/cmux.sock`)                               |
 | `CMUX_SOCKET_PASSWORD` | Auth password for the socket                                                   |

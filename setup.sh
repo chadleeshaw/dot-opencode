@@ -59,23 +59,6 @@ symlink "$AGENTS_DIR/commands" "$OPENCODE_CONFIG/commands"
 symlink "$AGENTS_DIR/skills"  "$OPENCODE_CONFIG/skills"
 symlink "$AGENTS_DIR/plugins" "$OPENCODE_CONFIG/plugins"
 
-# ── script symlinks ───────────────────────────────────────────────────────────
-
-info "Symlinking scripts to $LOCAL_BIN..."
-
-for script in "$AGENTS_DIR/scripts/"*; do
-  [ -f "$script" ] || continue
-  local_name="$LOCAL_BIN/$(basename "$script")"
-  chmod +x "$script"
-  if [ -L "$local_name" ] && [ "$(readlink "$local_name")" = "$script" ]; then
-    skip "$(basename "$script")"
-  else
-    [ -e "$local_name" ] && rm -f "$local_name"
-    ln -sf "$script" "$local_name"
-    success "$(basename "$script")"
-  fi
-done
-
 # ── PATH check ────────────────────────────────────────────────────────────────
 
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$LOCAL_BIN"; then
