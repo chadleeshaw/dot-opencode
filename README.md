@@ -1,14 +1,14 @@
 # dot-agents
 
-AI configuration for Claude Code and OpenCode — agents, commands, skills, and plugins.
+AI configuration for Claude Code — agents, commands, and skills.
 
-Cloned to `~/.agents` and symlinked into `~/.claude` and `~/.config/opencode` by `setup.sh`.
+Cloned to `~/.agents` and symlinked into `~/.claude` by `setup.sh`.
 
 ## Structure
 
 ```
 ~/.agents/
-├── agents/       # Custom agent definitions (Claude Code + OpenCode)
+├── agents/       # Custom agent definitions
 ├── commands/     # Slash commands (/shipit, /test, ...)
 ├── skills/       # Language/domain skills loaded on demand
 └── setup.sh      # Idempotent install script
@@ -25,7 +25,7 @@ git clone git@github.com:chadleeshaw/dot-opencode.git ~/.agents
 
 ## Agents
 
-Agents in `agents/` use Claude Code frontmatter (`name`, `description`, `model`, `tools`) with `mode: subagent` added for OpenCode compatibility. Claude Code is the primary target.
+Agents in `agents/` use Claude Code frontmatter (`name`, `description`, `model`, `tools`).
 
 | Agent | Purpose |
 |---|---|
@@ -44,31 +44,32 @@ Agents in `agents/` use Claude Code frontmatter (`name`, `description`, `model`,
 
 ## Commands
 
-Slash commands in `commands/` work in both Claude Code and OpenCode.
+Slash commands in `commands/` are invoked manually with `/name`.
 
 | Command | Purpose |
 |---|---|
-| `/context` | Load AI context notes from Obsidian (_ai/me, environment, conventions) |
+| `/context` | Load AI context notes from Obsidian (_ai/me, environment, infrastructure, workflows, team) |
 | `/review` | Review staged and unstaged changes against applicable coding skills and best practices |
 | `/shipit` | Stage, commit, and push changes with an auto-generated message |
 | `/simplify` | Refactor selected code for clarity and simplicity |
-| `/test` | Run tests and fix failures |
+| `/test` | Run linting and tests, auto-fix where possible |
+| `/zoom-out` | Step back for a higher-level perspective on the current code |
 
 ## Skills
 
-Skills in `skills/` are loaded on demand when a task matches their domain.
+Skills in `skills/` are auto-triggered when a task matches their domain.
 
 | Skill | Loaded for |
 |---|---|
-| `cmux` | cmux terminal multiplexer — workspaces, browser automation, notifications |
+| `caveman` | Ultra-compressed communication mode |
+| `css` | CSS best practices |
 | `golang` | Go best practices |
+| `html` | HTML best practices |
 | `incus` | Incus container and VM management via CLI |
 | `javascript` | JS/TS best practices |
-| `python` | Python best practices |
-| `css` | CSS best practices |
-| `html` | HTML best practices |
 | `kubernetes` | kubectl, pods, deployments, ArgoCD, helmfile, and Kafka on k8s |
 | `obsidian` | Obsidian notes and knowledge management |
+| `python` | Python best practices |
 | `saltstack` | SaltStack states, formulas, pillar, and configuration management |
 | `terraform` | Terraform HCL, modules, and infrastructure as code |
-
+| `zoom-out` | Higher-level perspective on current code or problem |
