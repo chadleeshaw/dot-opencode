@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# setup.sh — install dot-opencode on a new machine
+# setup.sh — install dot-opencode / dot-claude on a new machine
 #
 # Idempotent: safe to re-run. Creates symlinks and installs dependencies.
 # Called by ~/src/chadleeshaw/dotfiles/bootstrap.sh, or run standalone:
@@ -10,6 +10,7 @@ set -e
 
 AGENTS_DIR="${AGENTS_DIR:-$HOME/.agents}"
 OPENCODE_CONFIG="$HOME/.config/opencode"
+CLAUDE_CONFIG="$HOME/.claude"
 LOCAL_BIN="$HOME/.local/bin"
 
 info()    { echo "==> [dot-opencode] $*"; }
@@ -47,9 +48,10 @@ symlink() {
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
     skip "$dst"
   else
-    # Remove a real dir or stale symlink before linking
+    # Remove real dir or symlink (ln -sf won't replace a symlink-to-dir)
+    [ -L "$dst" ] && rm "$dst"
     [ -e "$dst" ] && rm -rf "$dst"
-    ln -sf "$src" "$dst"
+    ln -s "$src" "$dst"
     success "$dst -> $src"
   fi
 }
@@ -69,6 +71,16 @@ if ! echo "$PATH" | tr ':' '\n' | grep -qx "$LOCAL_BIN"; then
   echo "      export PATH=\"\$PATH:$LOCAL_BIN\""
   echo ""
 fi
+
+# ── claude config symlinks ───────────────────────────────────────────────────
+
+info "Symlinking claude config directories..."
+
+mkdir -p "$CLAUDE_CONFIG"
+
+symlink "$AGENTS_DIR/agents"      "$CLAUDE_CONFIG/agents"
+symlink "$AGENTS_DIR/commands"      "$CLAUDE_CONFIG/commands"
+symlink "$AGENTS_DIR/skills"        "$CLAUDE_CONFIG/skills"
 
 # ── forge config symlinks ─────────────────────────────────────────────────────
 
@@ -103,6 +115,9 @@ echo "  OpenCode agents:   $OPENCODE_CONFIG/agents    -> $AGENTS_DIR/agents"
 echo "  OpenCode commands: $OPENCODE_CONFIG/commands  -> $AGENTS_DIR/commands"
 echo "  OpenCode skills:   $OPENCODE_CONFIG/skills    -> $AGENTS_DIR/skills"
 echo "  OpenCode plugins:  $OPENCODE_CONFIG/plugins   -> $AGENTS_DIR/plugins"
+echo "  Claude agents:     $CLAUDE_CONFIG/agents      -> $AGENTS_DIR/claude-agents"
+echo "  Claude commands:   $CLAUDE_CONFIG/commands    -> $AGENTS_DIR/commands"
+echo "  Claude skills:     $CLAUDE_CONFIG/skills      -> $AGENTS_DIR/skills"
 echo "  Forge agents:      $FORGE_CONFIG/agents       -> $AGENTS_DIR/agents"
 echo "  Forge commands:    $FORGE_CONFIG/commands     -> $AGENTS_DIR/commands"
 echo "  Forge skills:      $FORGE_CONFIG/skills       -> $AGENTS_DIR/skills"

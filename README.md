@@ -1,14 +1,14 @@
-# dot-opencode
+# dot-agents
 
-OpenCode AI configuration — agents, commands, skills, plugins, and scripts.
+AI configuration for Claude Code and OpenCode — agents, commands, skills, and plugins.
 
-Cloned to `~/.agents` and symlinked into `~/.config/opencode` by `setup.sh`.
+Cloned to `~/.agents` and symlinked into `~/.claude` and `~/.config/opencode` by `setup.sh`.
 
 ## Structure
 
 ```
 ~/.agents/
-├── agents/       # Custom agent definitions
+├── agents/       # Custom agent definitions (Claude Code + OpenCode)
 ├── commands/     # Slash commands (/shipit, /test, ...)
 ├── skills/       # Language/domain skills loaded on demand
 ├── plugins/      # OpenCode JS plugins
@@ -22,11 +22,11 @@ git clone git@github.com:chadleeshaw/dot-opencode.git ~/.agents
 ~/.agents/setup.sh
 ```
 
-`setup.sh` symlinks everything into place and adds scripts to `~/.local/bin`. Safe to re-run.
+`setup.sh` symlinks everything into place. Safe to re-run.
 
 ## Agents
 
-Custom agents in `agents/` extend OpenCode's built-in agent types.
+Agents in `agents/` use Claude Code frontmatter (`name`, `description`, `model`, `tools`) with `mode: subagent` added for OpenCode compatibility. Claude Code is the primary target.
 
 | Agent | Purpose |
 |---|---|
@@ -34,15 +34,18 @@ Custom agents in `agents/` extend OpenCode's built-in agent types.
 | `bug-finder` | Identify logic errors and potential issues |
 | `code-review` | Code review focused on readability and security |
 | `documentation` | Write clear, concise README and docs files |
+| `domain-modeling` | Build and sharpen a project's domain model |
+| `grill-me` | Delegate to `/grilling` for stress-testing a plan |
+| `grill-with-docs` | Stress-test a plan and write ADRs as you go |
+| `grilling` | Interview the user relentlessly about a plan or design |
 | `optimizer` | Analyze runtime performance and identify bottlenecks |
 | `refactor` | Improve readability and maintainability |
 | `test-coverage` | Audit tests for coverage gaps and quality issues |
 | `test-writer` | Write readable, maintainable tests for existing code |
-| `grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding |
 
 ## Commands
 
-Slash commands in `commands/` are available inside any OpenCode session.
+Slash commands in `commands/` work in both Claude Code and OpenCode.
 
 | Command | Purpose |
 |---|---|
