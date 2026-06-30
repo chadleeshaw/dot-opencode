@@ -16,8 +16,8 @@ Read and internalize the following context notes about Chad and his environment:
 ## workflows.md
 !`obsidian read path="_ai/workflows.md"`
 
-## agents.md
-!`obsidian read path="_ai/agents.md"`
+## claude.md
+!`obsidian read path="_ai/claude.md"`
 
 ## team.md
 !`obsidian read path="_ai/team.md"`
