@@ -11,7 +11,6 @@ Cloned to `~/.agents` and symlinked into `~/.claude` and `~/.config/opencode` by
 ├── agents/       # Custom agent definitions (Claude Code + OpenCode)
 ├── commands/     # Slash commands (/shipit, /test, ...)
 ├── skills/       # Language/domain skills loaded on demand
-├── plugins/      # OpenCode JS plugins
 └── setup.sh      # Idempotent install script
 ```
 
@@ -73,10 +72,3 @@ Skills in `skills/` are loaded on demand when a task matches their domain.
 | `saltstack` | SaltStack states, formulas, pillar, and configuration management |
 | `terraform` | Terraform HCL, modules, and infrastructure as code |
 
-## Plugins
-
-| Plugin | Purpose |
-|---|---|
-| `cmux-feed.js` | Bridges OpenCode plugin events to the cmux socket feed |
-| `cmux-notify.js` | Sends a cmux notification ring when OpenCode goes idle or errors |
-| `cmux-session.js` | Bridges OpenCode session lifecycle events into cmux's restorable session store |

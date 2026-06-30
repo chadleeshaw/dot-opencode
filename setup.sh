@@ -59,7 +59,6 @@ symlink() {
 symlink "$AGENTS_DIR/agents"  "$OPENCODE_CONFIG/agents"
 symlink "$AGENTS_DIR/commands" "$OPENCODE_CONFIG/commands"
 symlink "$AGENTS_DIR/skills"  "$OPENCODE_CONFIG/skills"
-symlink "$AGENTS_DIR/plugins" "$OPENCODE_CONFIG/plugins"
 
 # ── PATH check ────────────────────────────────────────────────────────────────
 
@@ -102,7 +101,6 @@ echo ""
 echo "  OpenCode agents:   $OPENCODE_CONFIG/agents    -> $AGENTS_DIR/agents"
 echo "  OpenCode commands: $OPENCODE_CONFIG/commands  -> $AGENTS_DIR/commands"
 echo "  OpenCode skills:   $OPENCODE_CONFIG/skills    -> $AGENTS_DIR/skills"
-echo "  OpenCode plugins:  $OPENCODE_CONFIG/plugins   -> $AGENTS_DIR/plugins"
 echo "  Claude agents:     $CLAUDE_CONFIG/agents      -> $AGENTS_DIR/claude-agents"
 echo "  Claude commands:   $CLAUDE_CONFIG/commands    -> $AGENTS_DIR/commands"
 echo "  Claude skills:     $CLAUDE_CONFIG/skills      -> $AGENTS_DIR/skills"
