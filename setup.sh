@@ -82,18 +82,6 @@ symlink "$AGENTS_DIR/agents"      "$CLAUDE_CONFIG/agents"
 symlink "$AGENTS_DIR/commands"      "$CLAUDE_CONFIG/commands"
 symlink "$AGENTS_DIR/skills"        "$CLAUDE_CONFIG/skills"
 
-# ── forge config symlinks ─────────────────────────────────────────────────────
-
-FORGE_CONFIG="$HOME/forge"
-
-info "Symlinking forge config directories..."
-
-mkdir -p "$FORGE_CONFIG"
-
-symlink "$AGENTS_DIR/agents"   "$FORGE_CONFIG/agents"
-symlink "$AGENTS_DIR/commands" "$FORGE_CONFIG/commands"
-symlink "$AGENTS_DIR/skills"   "$FORGE_CONFIG/skills"
-symlink "$AGENTS_DIR/plugins"  "$FORGE_CONFIG/plugins"
 
 # ── cmux CLI symlink ──────────────────────────────────────────────────────────
 
@@ -118,9 +106,5 @@ echo "  OpenCode plugins:  $OPENCODE_CONFIG/plugins   -> $AGENTS_DIR/plugins"
 echo "  Claude agents:     $CLAUDE_CONFIG/agents      -> $AGENTS_DIR/claude-agents"
 echo "  Claude commands:   $CLAUDE_CONFIG/commands    -> $AGENTS_DIR/commands"
 echo "  Claude skills:     $CLAUDE_CONFIG/skills      -> $AGENTS_DIR/skills"
-echo "  Forge agents:      $FORGE_CONFIG/agents       -> $AGENTS_DIR/agents"
-echo "  Forge commands:    $FORGE_CONFIG/commands     -> $AGENTS_DIR/commands"
-echo "  Forge skills:      $FORGE_CONFIG/skills       -> $AGENTS_DIR/skills"
-echo "  Forge plugins:     $FORGE_CONFIG/plugins      -> $AGENTS_DIR/plugins"
 echo "  Scripts:           $(ls "$LOCAL_BIN" | tr '\n' ' ' | sed 's/ $//')"
 echo ""
