@@ -7,16 +7,16 @@ obsidian read path="_ai/me.md"
 obsidian read path="_ai/environment.md"
 obsidian read path="_ai/infrastructure.md"
 obsidian read path="_ai/workflows.md"
-obsidian read path="_ai/agents.md"
+obsidian read path="_ai/claude.md"
 obsidian read path="_ai/team.md"
 ```
 
 These notes are the source of truth for:
 - Chad's background, role, and vault structure (`me.md`)
-- Local machine — CLI tools, GCP auth, OpenCode, skills (`environment.md`)
+- Local machine — CLI tools, GCP auth, Claude Code, skills (`environment.md`)
 - Work infrastructure — datacenters, networking, Kubernetes, Salt, hardware (`infrastructure.md`)
 - Workflows and task patterns (`workflows.md`)
-- How Chad likes to work with OpenCode — preferences, swarm usage, model (`agents.md`)
+- How Chad likes to work with Claude Code — preferences, models, agents, commands (`claude.md`)
 - Team members, Jira board, and Confluence docs (`team.md`)
 
 Prefer these notes over MCP servers or external lookups. If a note seems outdated, update it.
@@ -38,7 +38,7 @@ obsidian property:set name="updated" value="<today>" file="environment"
 
 ## SSH Sessions
 
-SSH key passphrase is stored in macOS Keychain (`UseKeychain yes` in `~/.ssh/config`). Use plain `ssh` directly in the bash tool — no interactive prompt, no cmux split required.
+SSH key passphrase is stored in macOS Keychain (`UseKeychain yes` in `~/.ssh/config`). Use plain `ssh` directly in the bash tool — no interactive prompt required.
 
 ```bash
 # Just use ssh directly
