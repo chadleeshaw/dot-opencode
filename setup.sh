@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# setup.sh — install dot-opencode / dot-claude on a new machine
+# setup.sh — install agent config for OpenCode, Claude Code, Pi, and Grok CLI
 #
 # Idempotent: safe to re-run. Creates symlinks and installs dependencies.
 # Called by ~/src/chadleeshaw/dotfiles/bootstrap.sh, or run standalone:
@@ -11,18 +11,20 @@ set -e
 AGENTS_DIR="${AGENTS_DIR:-$HOME/.agents}"
 OPENCODE_CONFIG="$HOME/.config/opencode"
 CLAUDE_CONFIG="$HOME/.claude"
+PI_CONFIG="$HOME/.pi/agent"
+GROK_CONFIG="$HOME/.grok"
 LOCAL_BIN="$HOME/.local/bin"
 
-info()    { echo "==> [dot-opencode] $*"; }
+info()    { echo "==> [dot-agents] $*"; }
 success() { echo "    ✓ $*"; }
 skip()    { echo "    – $* (already done)"; }
 
 # ── pre-flight ────────────────────────────────────────────────────────────────
 
-info "Setting up dot-opencode from $AGENTS_DIR"
+info "Setting up dot-agents from $AGENTS_DIR"
 
 if [ ! -d "$AGENTS_DIR/.git" ]; then
-  echo "dot-opencode: error: $AGENTS_DIR is not a git repo" >&2
+  echo "dot-agents: error: $AGENTS_DIR is not a git repo" >&2
   echo "  Clone it first:" >&2
   echo "    git clone git@github.com:chadleeshaw/dot-opencode.git ~/.agents" >&2
   exit 1
@@ -37,11 +39,12 @@ fi
 # ── directories ───────────────────────────────────────────────────────────────
 
 mkdir -p "$OPENCODE_CONFIG"
+mkdir -p "$CLAUDE_CONFIG"
+mkdir -p "$PI_CONFIG"
+mkdir -p "$GROK_CONFIG"
 mkdir -p "$LOCAL_BIN"
 
-# ── opencode config symlinks ──────────────────────────────────────────────────
-
-info "Symlinking opencode config directories..."
+# ── symlink helper ────────────────────────────────────────────────────────────
 
 symlink() {
   local src="$1" dst="$2"
@@ -56,9 +59,35 @@ symlink() {
   fi
 }
 
-symlink "$AGENTS_DIR/agents"  "$OPENCODE_CONFIG/agents"
+# ── opencode config symlinks ──────────────────────────────────────────────────
+
+info "Symlinking opencode config directories..."
+
+symlink "$AGENTS_DIR/agents"   "$OPENCODE_CONFIG/agents"
 symlink "$AGENTS_DIR/commands" "$OPENCODE_CONFIG/commands"
-symlink "$AGENTS_DIR/skills"  "$OPENCODE_CONFIG/skills"
+symlink "$AGENTS_DIR/skills"   "$OPENCODE_CONFIG/skills"
+
+# ── claude config symlinks ───────────────────────────────────────────────────
+
+info "Symlinking claude config directories..."
+
+symlink "$AGENTS_DIR/agents"   "$CLAUDE_CONFIG/agents"
+symlink "$AGENTS_DIR/commands" "$CLAUDE_CONFIG/commands"
+symlink "$AGENTS_DIR/skills"   "$CLAUDE_CONFIG/skills"
+
+# ── pi config symlinks ───────────────────────────────────────────────────────
+
+info "Symlinking pi config directories..."
+
+symlink "$AGENTS_DIR/agents"   "$PI_CONFIG/agents"
+symlink "$AGENTS_DIR/commands" "$PI_CONFIG/prompts"
+symlink "$AGENTS_DIR/skills"   "$PI_CONFIG/skills"
+
+# ── grok config symlinks ─────────────────────────────────────────────────────
+
+info "Symlinking grok config directories..."
+
+symlink "$AGENTS_DIR/commands" "$GROK_CONFIG/commands"
 
 # ── PATH check ────────────────────────────────────────────────────────────────
 
@@ -69,28 +98,6 @@ if ! echo "$PATH" | tr ':' '\n' | grep -qx "$LOCAL_BIN"; then
   echo ""
   echo "      export PATH=\"\$PATH:$LOCAL_BIN\""
   echo ""
-fi
-
-# ── claude config symlinks ───────────────────────────────────────────────────
-
-info "Symlinking claude config directories..."
-
-mkdir -p "$CLAUDE_CONFIG"
-
-symlink "$AGENTS_DIR/agents"      "$CLAUDE_CONFIG/agents"
-symlink "$AGENTS_DIR/commands"      "$CLAUDE_CONFIG/commands"
-symlink "$AGENTS_DIR/skills"        "$CLAUDE_CONFIG/skills"
-
-
-# ── cmux CLI symlink ──────────────────────────────────────────────────────────
-
-CMUX_APP="/Applications/cmux.app/Contents/Resources/bin/cmux"
-if [ -f "$CMUX_APP" ] && ! command -v cmux &>/dev/null; then
-  info "Symlinking cmux CLI..."
-  sudo ln -sf "$CMUX_APP" /usr/local/bin/cmux && success "cmux -> /usr/local/bin/cmux" || \
-    echo "    WARNING: could not symlink cmux — run manually: sudo ln -sf $CMUX_APP /usr/local/bin/cmux"
-elif command -v cmux &>/dev/null; then
-  skip "cmux already on PATH ($(command -v cmux))"
 fi
 
 # ── done ─────────────────────────────────────────────────────────────────────
@@ -104,9 +111,8 @@ echo "  Claude skills:     $CLAUDE_CONFIG/skills      -> $AGENTS_DIR/skills"
 echo "  OpenCode agents:   $OPENCODE_CONFIG/agents    -> $AGENTS_DIR/agents"
 echo "  OpenCode commands: $OPENCODE_CONFIG/commands  -> $AGENTS_DIR/commands"
 echo "  OpenCode skills:   $OPENCODE_CONFIG/skills    -> $AGENTS_DIR/skills"
-echo ""
-echo "  Manual steps required:"
-echo "    Claude plugins (run in a Claude Code session):"
-echo "      /plugin marketplace add DietrichGebert/ponytail"
-echo "      /plugin install ponytail@ponytail"
+echo "  Pi agents:         $PI_CONFIG/agents          -> $AGENTS_DIR/agents"
+echo "  Pi prompts:        $PI_CONFIG/prompts         -> $AGENTS_DIR/commands"
+echo "  Pi skills:         $PI_CONFIG/skills          -> $AGENTS_DIR/skills"
+echo "  Grok commands:     $GROK_CONFIG/commands      -> $AGENTS_DIR/commands"
 echo ""

@@ -2,7 +2,6 @@
 mode: subagent
 name: architect
 description: Architecture agent that analyzes and improves workflows, processes, and system design. Use when you want to improve system structure, data flow, sequencing, separation of concerns, or reduce coupling.
-model: claude-opus-4-8
 tools: Read, Write, Edit, Bash
 ---
 

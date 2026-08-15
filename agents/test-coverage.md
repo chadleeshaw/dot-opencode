@@ -2,7 +2,6 @@
 mode: subagent
 name: test-coverage
 description: Test coverage auditing agent that identifies gaps in existing test suites. Use when you want to assess what is missing or inadequately tested — happy paths, edge cases, error conditions, branch coverage, and test quality issues. Does not write tests.
-model: claude-sonnet-4-6
 tools: Read, Bash
 ---
 

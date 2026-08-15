@@ -1,8 +1,8 @@
 # dot-agents
 
-AI configuration for Claude Code — agents, commands, and skills.
+AI configuration for OpenCode, Claude Code, Pi, and Grok CLI — agents, commands, and skills.
 
-Cloned to `~/.agents` and symlinked into `~/.claude` by `setup.sh`.
+Cloned to `~/.agents` and symlinked into each harness by `setup.sh`.
 
 ## Structure
 
@@ -11,6 +11,7 @@ Cloned to `~/.agents` and symlinked into `~/.claude` by `setup.sh`.
 ├── agents/       # Custom agent definitions
 ├── commands/     # Slash commands (/shipit, /test, ...)
 ├── skills/       # Language/domain skills loaded on demand
+├── templates/    # Format templates (ADR, Context Modeling)
 └── setup.sh      # Idempotent install script
 ```
 
@@ -62,13 +63,18 @@ Skills in `skills/` are auto-triggered when a task matches their domain.
 | Skill | Loaded for |
 |---|---|
 | `caveman` | Ultra-compressed communication mode |
+| `computer-use` | Desktop app inspection and UI operation via Orca |
 | `css` | CSS best practices |
+| `design-taste-frontend` | Anti-slop frontend and design system guidance |
+| `find-skills` | Discover and install agent skills |
 | `golang` | Go best practices |
 | `html` | HTML best practices |
 | `incus` | Incus container and VM management via CLI |
 | `javascript` | JS/TS best practices |
 | `kubernetes` | kubectl, pods, deployments, ArgoCD, helmfile, and Kafka on k8s |
 | `obsidian` | Obsidian notes and knowledge management |
+| `orca-cli` | Orca worktree, terminal, and automation control |
+| `orchestration` | Multi-agent coordination and DAG workflows via Orca |
 | `python` | Python best practices |
 | `saltstack` | SaltStack states, formulas, pillar, and configuration management |
 | `terraform` | Terraform HCL, modules, and infrastructure as code |

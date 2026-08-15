@@ -2,7 +2,6 @@
 mode: subagent
 name: code-review
 description: Code review agent focused on readability, maintainability, and security issues. Use when you want structured review feedback on naming, complexity, function size, dead code, and security vulnerabilities. Reports issues without making changes.
-model: claude-sonnet-4-6
 tools: Read, Bash
 ---
 
