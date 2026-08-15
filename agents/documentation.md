@@ -2,7 +2,6 @@
 mode: subagent
 name: documentation
 description: Documentation agent that writes clear, concise README and docs/ files. Use when you want to generate or update project documentation. Reads the actual codebase before writing — never invents content.
-tools: Read, Write, Edit, Bash
 ---
 
 # Documentation Agent

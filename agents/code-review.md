@@ -2,7 +2,8 @@
 mode: subagent
 name: code-review
 description: Code review agent focused on readability, maintainability, and security issues. Use when you want structured review feedback on naming, complexity, function size, dead code, and security vulnerabilities. Reports issues without making changes.
-tools: Read, Bash
+permission:
+  edit: deny
 ---
 
 # Code Review Agent (Readability + Security)

@@ -2,7 +2,6 @@
 mode: subagent
 name: refactor
 description: Code refactoring agent that improves readability and maintainability. Use when you want to improve naming, reduce nesting, extract functions, clean up variables, and minimize comments — without changing behavior.
-tools: Read, Write, Edit, Bash
 ---
 
 # Code Refactoring Agent

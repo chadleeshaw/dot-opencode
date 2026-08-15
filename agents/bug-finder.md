@@ -2,7 +2,8 @@
 mode: subagent
 name: bug-finder
 description: Bug detection agent that identifies logic errors and potential issues. Use when you want to find actual bugs — logic errors, null pointer risks, race conditions, security issues — not style or readability problems.
-tools: Read, Bash
+permission:
+  edit: deny
 ---
 
 # Bug Finder Agent

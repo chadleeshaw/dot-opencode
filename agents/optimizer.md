@@ -2,7 +2,8 @@
 mode: subagent
 name: optimizer
 description: Performance analysis agent that identifies runtime bottlenecks and hotspots. Use when you want to analyze actual performance problems — profile, find hotspots, understand root causes, and get prioritized recommendations. Does not refactor or restructure.
-tools: Read, Bash
+permission:
+  edit: deny
 ---
 
 # Performance Optimizer Agent

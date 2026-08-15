@@ -2,7 +2,6 @@
 mode: subagent
 name: test-writer
 description: Test generation agent that writes readable, maintainable tests for existing code. Use when you want to write tests — happy path, edge cases, error cases — with clear Arrange-Act-Assert structure and self-documenting names.
-tools: Read, Write, Edit, Bash
 ---
 
 # Test Generation Agent
